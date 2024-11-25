@@ -1,0 +1,176 @@
+// src/feature/laser_offset.h
+#ifndef LASER_OFFSET_H
+#define LASER_OFFSET_H
+
+class LaserOffset {
+public:
+    static float x_offset;
+    static float y_offset;
+    
+    static void init();
+    static void save_offsets();
+    static void load_offsets();
+    static void apply_offsets(float &x, float &y);
+    static void remove_offsets(float &x, float &y);
+};
+
+// src/feature/laser_offset.cpp
+#include "laser_offset.h"
+#include "../module/configuration_store.h"
+#include "../module/motion.h"
+#include "../lcd/ultralcd.h"
+
+float LaserOffset::x_offset = 0;
+float LaserOffset::y_offset = 0;
+
+void LaserOffset::init() {
+    load_offsets();
+}
+
+void LaserOffset::save_offsets() {
+    persistentStore.write_data(
+        EEPROM_LASER_OFFSET,
+        &x_offset,
+        sizeof(x_offset)
+    );
+    persistentStore.write_data(
+        EEPROM_LASER_OFFSET + sizeof(float),
+        &y_offset,
+        sizeof(y_offset)
+    );
+    persistentStore.commit();
+}
+
+void LaserOffset::load_offsets() {
+    persistentStore.read_data(
+        EEPROM_LASER_OFFSET,
+        &x_offset,
+        sizeof(x_offset)
+    );
+    persistentStore.read_data(
+        EEPROM_LASER_OFFSET + sizeof(float),
+        &y_offset,
+        sizeof(y_offset)
+    );
+}
+
+void LaserOffset::apply_offsets(float &x, float &y) {
+    if (mode_switch.get_current_mode() == ModeSwitch::MODE_LASER) {
+        x += x_offset;
+        y += y_offset;
+    }
+}
+
+void LaserOffset::remove_offsets(float &x, float &y) {
+    if (mode_switch.get_current_mode() == ModeSwitch::MODE_LASER) {
+        x -= x_offset;
+        y -= y_offset;
+    }
+}
+
+// src/module/motion.cpp
+// Füge dies zur bestehenden prepare_move_to_destination() Funktion hinzu:
+void prepare_move_to_destination() {
+    #if ENABLED(DUAL_MODE_PRINTER_AND_LASER)
+        if (mode_switch.get_current_mode() == ModeSwitch::MODE_LASER) {
+            // Offsets auf Zielposition anwenden
+            LaserOffset::apply_offsets(destination[X_AXIS], destination[Y_AXIS]);
+        }
+    #endif
+
+    // Restlicher bestehender Bewegungscode...
+}
+
+// src/lcd/menu/menu_main.cpp
+void menu_main() {
+    START_MENU();
+
+    if (mode_switch.get_current_mode() == ModeSwitch::MODE_LASER) {
+        MENU_ITEM(submenu, "LASER MODE", menu_laser_main);
+    } else {
+        MENU_ITEM(submenu, "3D PRINT MODE", menu_print_main);
+    }
+
+    END_MENU();
+}
+
+// src/lcd/menu/menu_laser.cpp
+void menu_laser_settings() {
+    START_MENU();
+    MENU_BACK("Back");
+
+    // X-Offset Einstellung
+    MENU_ITEM_EDIT(float42_52, "X Offset", &LaserOffset::x_offset, -100, 100);
+    
+    // Y-Offset Einstellung
+    MENU_ITEM_EDIT(float42_52, "Y Offset", &LaserOffset::y_offset, -100, 100);
+    
+    // Speichern Button
+    MENU_ITEM(function, "Save Offsets", []{ 
+        LaserOffset::save_offsets();
+        ui.set_status(PSTR("Offsets saved"));
+    });
+
+    // Reset Button
+    MENU_ITEM(function, "Reset Offsets", []{ 
+        LaserOffset::x_offset = 0;
+        LaserOffset::y_offset = 0;
+        LaserOffset::save_offsets();
+        ui.set_status(PSTR("Offsets reset"));
+    });
+
+    END_MENU();
+}
+
+void menu_laser_main() {
+    START_MENU();
+    MENU_BACK("Main Menu");
+
+    MENU_ITEM(submenu, "Move", menu_move);
+    MENU_ITEM(submenu, "Settings", menu_laser_settings);
+    
+    if (card.isMounted()) {
+        MENU_ITEM(submenu, "Print from SD", menu_sdcard);
+    }
+
+    END_MENU();
+}
+
+// src/Marlin.cpp
+// In der setup() Funktion:
+void setup() {
+    // ... bestehender Setup-Code ...
+
+    #if ENABLED(DUAL_MODE_PRINTER_AND_LASER)
+        LaserOffset::init();
+    #endif
+
+    // ... weiterer Setup-Code ...
+}
+
+// In der loop() Funktion:
+void loop() {
+    // ... bestehender Loop-Code ...
+
+    #if ENABLED(DUAL_MODE_PRINTER_AND_LASER)
+        if (mode_switch.get_current_mode() == ModeSwitch::MODE_LASER) {
+            // Aktuelle Position für Anzeige korrigieren
+            float display_x = current_position[X_AXIS];
+            float display_y = current_position[Y_AXIS];
+            LaserOffset::remove_offsets(display_x, display_y);
+            
+            // Status-Update mit korrigierten Koordinaten
+            if (ui.should_draw()) {
+                char buffer[32];
+                sprintf_P(buffer, PSTR("X:%4.1f Y:%4.1f"), display_x, display_y);
+                ui.set_status(buffer);
+            }
+        }
+    #endif
+}
+
+// src/Configuration.h
+// Füge diese Definitionen hinzu:
+#if ENABLED(DUAL_MODE_PRINTER_AND_LASER)
+    #define EEPROM_LASER_OFFSET 200  // Speicheradresse für Laser-Offsets
+#endif

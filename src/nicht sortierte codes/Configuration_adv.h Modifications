@@ -1,0 +1,71 @@
+// Suchen Sie den Bereich für Custom Features oder fügen Sie diesen Block
+// vor dem Ende der CONFIGURATION_ADV_H Definition ein
+
+//===========================================================================
+//========================= LAUZ WORKSTATION Settings ========================
+//===========================================================================
+
+#if ENABLED(DUAL_MODE_PRINTER_AND_LASER)
+  
+  // Bewegungseinstellungen
+  #define HOMING_FEEDRATE_XY      (50*60)  // mm/min
+  #define HOMING_FEEDRATE_Z       (4*60)   // mm/min
+  
+  // LCD Display Einstellungen
+  #define LCD_TIMEOUT_TO_STATUS 15000
+  #define LCD_SET_PROGRESS_MANUALLY
+  #define SHOW_REMAINING_TIME
+  #define USE_M73_REMAINING_TIME
+  #define SCROLL_LONG_FILENAMES
+  #define STATUS_MESSAGE_SCROLLING
+
+  // UI Einstellungen
+  #define INDIVIDUAL_AXIS_HOMING_MENU
+  #define LEVEL_BED_CORNERS
+  #define MENU_ITEM_CASE_LIGHT
+
+  // EEPROM Einstellungen
+  #define EEPROM_SETTINGS              // EEPROM aktivieren
+  #define EEPROM_CHITCHAT             // Info Ausgabe beim Speichern/Laden
+  #define EEPROM_BOOT_SILENT          // Keine EEPROM Meldung beim Start
+  #define EEPROM_AUTO_INIT            // EEPROM automatisch initialisieren
+
+  // Notfall Parser 
+  #define EMERGENCY_PARSER
+  #define HOST_KEEPALIVE_FEATURE
+  #define DEFAULT_KEEPALIVE_INTERVAL 2
+
+  // Software Endstops (für Arbeitsfläche)
+  #define SOFT_ENDSTOPS_MENU_ITEM     // Menüpunkt für Soft Endstops
+  #define MIN_SOFTWARE_ENDSTOPS
+  #define MAX_SOFTWARE_ENDSTOPS
+  
+  // Temperaturschutz
+  #define THERMAL_PROTECTION_PERIOD 40        // Sekunden
+  #define THERMAL_PROTECTION_HYSTERESIS 4     // Grad Celsius
+  #define ADAPTIVE_FAN_SLOWING              // Lüfter bei Temperatur anpassen
+  #define HEATER_0_MINTEMP   5
+  #define HEATER_0_MAXTEMP 275
+  #define BED_MINTEMP        5
+  #define BED_MAXTEMP      120
+  
+  // LCD Update Intervall
+  #define STATUS_UPDATE_INTERVAL   250    // ms zwischen Updates (Standard: 500)
+  #define LCD_UPDATE_INTERVAL      100    // ms zwischen Updates (Standard: 200)
+  
+  // SD Karte
+  #define LONG_FILENAME_HOST_SUPPORT    // Lange Dateinamen unterstützen
+  #define AUTO_REPORT_SD_STATUS         // SD Status automatisch melden
+  #define SDCARD_SORT_ALPHA             // Dateien alphabetisch sortieren
+  #define SDSORT_CACHE_NAMES            // Namen cachen für schnelleres Sortieren
+  
+  // Sonstiges
+  #define AUTO_REPORT_TEMPERATURES      // Temperaturen automatisch melden
+  #define AUTO_REPORT_POSITION          // Position automatisch melden
+  
+  // Debug Einstellungen (bei Bedarf aktivieren)
+  //#define DEBUG_LEVELING_FEATURE
+  //#define DEBUG_MOTION
+  //#define DEBUG_LASER_MODE
+  
+#endif

@@ -1,0 +1,91 @@
+// Marlin.h - Hauptheaderdatei
+
+#ifndef MARLIN_H
+#define MARLIN_H
+
+// ... bestehende Includes ...
+
+// Modus-Unterstützung hinzufügen
+#if ENABLED(DUAL_MODE_PRINTER_AND_LASER)
+  #include "feature/mode_switch.h"
+  #include "feature/work_area_handler.h"
+#endif
+
+// ... bestehender Code ...
+
+// Globale Instanzen
+extern ModeSwitch mode_switch;
+extern WorkAreaHandler work_area_handler;
+
+#endif
+
+// Marlin.cpp - Hauptimplementierungsdatei
+#include "Marlin.h"
+
+// Globale Instanzen initialisieren
+#if ENABLED(DUAL_MODE_PRINTER_AND_LASER)
+  ModeSwitch mode_switch;
+  WorkAreaHandler work_area_handler;
+#endif
+
+void setup() {
+  // ... bestehender Setup-Code ...
+
+  #if ENABLED(DUAL_MODE_PRINTER_AND_LASER)
+    // Moduswechsel und Arbeitsbereich initialisieren
+    mode_switch.init();
+    work_area_handler.init();
+  #endif
+
+  // ... weiterer Setup-Code ...
+}
+
+void loop() {
+  #if ENABLED(DUAL_MODE_PRINTER_AND_LASER)
+    // Modusabhängige Verarbeitung
+    mode_switch.process();
+    
+    // Arbeitsbereich-Prüfungen im Laser-Modus
+    if (mode_switch.get_current_mode() == ModeSwitch::MODE_LASER) {
+      work_area_handler.process();
+    }
+  #endif
+
+  // ... bestehender Loop-Code ...
+}
+
+// src/MarlinConfig.h
+#ifndef MARLINCONFIG_H
+#define MARLINCONFIG_H
+
+// ... bestehende Includes ...
+
+// Dual-Mode-Konfiguration
+#if ENABLED(DUAL_MODE_PRINTER_AND_LASER)
+  #define CUSTOM_MACHINE_NAME "LAUZ WORKSTATION"
+  #define CUSTOM_STATUS_SCREEN_IMAGE    // Ermöglicht custom Boot-Screen
+#endif
+
+#endif
+
+// src/pins/pins_N32.h - Board-spezifische Pin-Definitionen
+#ifndef PINS_N32_H
+#define PINS_N32_H
+
+// ... bestehende Pin-Definitionen ...
+
+#if ENABLED(DUAL_MODE_PRINTER_AND_LASER)
+  // Speziell für N32 Board angepasste Pins
+  #define MODE_SWITCH_STATUS_PIN   PC13  // Optional: Hardware-Modus-Anzeige
+  #define WORK_AREA_EEPROM_OFFSET 100    // EEPROM Start-Adresse für Einstellungen
+#endif
+
+#endif
+
+// src/HAL/HAL_STM32/persistent_store_impl.cpp
+// EEPROM-Implementation für STM32
+#if ENABLED(DUAL_MODE_PRINTER_AND_LASER)
+  // Zusätzliche EEPROM-Bereiche für Modus-Einstellungen
+  #define EEPROM_MODE_SETTINGS      (EEPROM_OFFSET + 50)
+  #define EEPROM_WORK_AREA_SETTINGS (EEPROM_OFFSET + 100)
+#endif

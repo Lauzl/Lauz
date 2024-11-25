@@ -1,0 +1,29 @@
+// Suchen Sie den Bereich mit den Custom Features oder fügen Sie diesen Block
+// vor dem Ende der CONFIGURATION_H Definition ein
+
+//===========================================================================
+//============================= Custom Features ==============================
+//===========================================================================
+
+// LAUZ WORKSTATION Dual Mode
+#define DUAL_MODE_PRINTER_AND_LASER
+#if ENABLED(DUAL_MODE_PRINTER_AND_LASER)
+  #define CUSTOM_MACHINE_NAME "LAUZ WORKSTATION"
+  
+  // Arbeitsbereich-Einstellungen
+  #define X_BED_SIZE 400
+  #define Y_BED_SIZE 400
+  #define Z_MAX_POS 400
+
+  // Steps pro mm (übernommen von Ihren bestehenden Einstellungen)
+  #define DEFAULT_AXIS_STEPS_PER_UNIT   { 80, 80, 400, 93 }
+
+  // Maximale Geschwindigkeit (mm/s)
+  #define DEFAULT_MAX_FEEDRATE          { 500, 500, 5, 25 }
+
+  // Maximale Beschleunigung (mm/s2)
+  #define DEFAULT_MAX_ACCELERATION      { 500, 500, 100, 1000 }
+
+  // EEPROM Einstellungen für Laser Offsets
+  #define EEPROM_LASER_OFFSET 200
+#endif

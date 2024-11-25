@@ -1,0 +1,12 @@
+// In Configuration.h
+
+//===========================================================================
+//============================= Custom Features ==============================
+//===========================================================================
+
+// Aktiviere Dual Mode (3D Drucker und Laser)
+#define DUAL_MODE_PRINTER_AND_LASER
+
+// Wenn Sie den Dual Mode später deaktivieren möchten, 
+// kommentieren Sie die Zeile aus (// davor setzen):
+// #define DUAL_MODE_PRINTER_AND_LASER
